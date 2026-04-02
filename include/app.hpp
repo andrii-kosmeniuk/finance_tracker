@@ -2,14 +2,14 @@
 #define APP_HPP
 
 #include <wx/wx.h>
+#include <memory>
 #include "mysql_connection.hpp"
 
 class App : public wxApp{
     public:
         bool OnInit();
-        ~App();
     private:
-        MySQLConnection* db;
+        std::unique_ptr<MySQLConnection> db;
 };
 
 #endif

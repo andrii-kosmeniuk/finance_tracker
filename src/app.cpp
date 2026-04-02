@@ -8,10 +8,10 @@ using namespace std;
 
 bool App::OnInit(){
     loadEnvFile();
-    db = new MySQLConnection();
+    db = std::make_unique<MySQLConnection>();
 
     if(!db->connect())
-        return 1;
+        return false;
     cout << "Programm is running!"<<endl;
 
     const string create_db_query ="CREATE DATABASE IF NOT EXISTS manage_spendings";
@@ -44,8 +44,4 @@ bool App::OnInit(){
 
     cout<<"Gui created in the center"<<endl;
     return true;
-}
-
-App::~App(){
-    delete db;
 }
