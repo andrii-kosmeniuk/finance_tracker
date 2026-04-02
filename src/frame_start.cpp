@@ -30,14 +30,14 @@ void StartFrame::OnRegisterClick(wxCommandEvent& evt) {
     RegisterFrame* regFrame = new RegisterFrame("Register", db);
     regFrame->Show(true);
     regFrame->Center();
-    this->Hide();
     wxTheApp->SetTopWindow(regFrame);
+    this->Destroy();
 }
 
 void StartFrame::OnLoginClick(wxCommandEvent& evt) {
     LoginFrame* loginFrame = new LoginFrame("Login", db);
     loginFrame->Show(true);
     loginFrame->Center();
-    this->Hide();
     wxTheApp->SetTopWindow(loginFrame);
+    this->Destroy();
 }

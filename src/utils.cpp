@@ -72,7 +72,9 @@ bool executeSQLFromFile(MySQLConnection& db, const string& filepath){
         string query = sql.substr(0, pos+1);
         sql.erase(0,pos+1);
         if(query.find_first_not_of(" \n\t\r") != string::npos){
-            db.executeQuery(query);
+            if (!db.executeQuery(query)) {
+                return false;
+            }
         }
     }
     return true;
