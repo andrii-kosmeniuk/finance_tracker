@@ -3,7 +3,15 @@
 
 #include <string>
 #include <vector>
+#if __has_include(<mysql/mysql.h>)
 #include <mysql/mysql.h>
+#elif __has_include(<mysql.h>)
+#include <mysql.h>
+#elif __has_include(<mariadb/mysql.h>)
+#include <mariadb/mysql.h>
+#else
+#error "MySQL/MariaDB headers not found. Install libmysqlclient-dev or libmariadb-dev."
+#endif
 
 using namespace std;
 

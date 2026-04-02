@@ -1,6 +1,5 @@
 #include "../include/mysql_connection.hpp"
 #include "../include/utils.hpp"
-#include <mysql/mysql.h>
 #include <wx/wx.h>
 #include <iostream>
 #include <string>
