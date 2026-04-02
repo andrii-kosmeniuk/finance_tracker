@@ -1,6 +1,7 @@
 #include "../include/frame_dashboard.hpp"
 #include "../include/mysql_connection.hpp"
 #include "../include/frame_start.hpp"
+#include <wx/dcbuffer.h>
 #include <wx/wx.h>
 #include <wx/valnum.h>
 #include <string>

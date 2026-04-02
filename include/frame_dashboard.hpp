@@ -3,6 +3,7 @@
 
 #include <wx/statline.h>
 #include <wx/wx.h>
+#include <vector>
 #include "mysql_connection.hpp"
 
 class DashboardFrame: public wxFrame {
