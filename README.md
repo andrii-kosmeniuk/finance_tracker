@@ -25,12 +25,12 @@ Install the following:
 
 1. **clang++** (with C++17 support)
 2. **make**
-3. **wxWidgets development package** (must provide `wx-config`)
+3. **wxWidgets development package** (must provide `wx-config` *or* `wxwidgets` pkg-config metadata)
 4. **MySQL client development library** (`libmysqlclient`)
 5. **libsodium development library**
 6. A running **MySQL/MariaDB server**
 
-> The build uses `wx-config --cxxflags` and `wx-config --libs`, so ensure `wx-config` is available in your PATH.
+> The build tries `wx-config`, `wx-config-gtk3`, and versioned `wx-config-*` binaries first, then falls back to `pkg-config` (`wxwidgets` / `wxgtk3.2`).
 
 ## Configuration
 
@@ -89,7 +89,9 @@ make clean
 ## Troubleshooting
 
 - **`wx-config: command not found`**
-  - Install wxWidgets development packages and ensure `wx-config` is in PATH.
+  - Install wxWidgets development packages and ensure one of these is available:
+    - `wx-config`/`wx-config-gtk3`/`wx-config-3.2`
+    - `pkg-config` metadata for `wxwidgets` or `wxgtk3.2`
 - **MySQL connection error on startup**
   - Verify host/user/password/port in `.env`.
   - Confirm DB server is running and accessible.
