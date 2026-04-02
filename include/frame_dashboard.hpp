@@ -3,6 +3,7 @@
 
 #include <wx/statline.h>
 #include <wx/wx.h>
+#include <vector>
 #include "mysql_connection.hpp"
 
 class DashboardFrame: public wxFrame {
@@ -15,6 +16,8 @@ class DashboardFrame: public wxFrame {
         void OnHistoryClicked(wxCommandEvent& event);
         void OnFriendsClicked(wxCommandEvent& event);
         void OnLogoutClicked(wxCommandEvent& event);
+        wxPanel* CreateExpensesChart(wxWindow* parent);
+        void DrawExpensesChart(wxPaintEvent& event);
 
         wxPanel* contentPanel;
         wxPanel* panel;
@@ -26,6 +29,7 @@ class DashboardFrame: public wxFrame {
         wxButton* btnFriends;
 
         MySQLConnection& db;
+        std::vector<std::pair<wxString, double>> monthlyExpenses;
 };
 
 #endif
