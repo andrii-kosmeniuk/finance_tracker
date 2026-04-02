@@ -65,6 +65,7 @@ DashboardFrame::DashboardFrame(const wxString& title, const wxString& nickname, 
 }
 
 void DashboardFrame::OnClose(wxCloseEvent& evt) {
+    (void)evt;
     Destroy();
     wxTheApp->ExitMainLoop();
 }
@@ -96,6 +97,7 @@ void DashboardFrame::ShowWelcome() {
 }
 
 void DashboardFrame::OnProfileClicked(wxCommandEvent& event) {
+    (void)event;
     wxBoxSizer* sizer = static_cast<wxBoxSizer*>(contentPanel->GetSizer());
     sizer->Clear(true);
 
@@ -116,6 +118,7 @@ void DashboardFrame::OnProfileClicked(wxCommandEvent& event) {
 }
 
 void DashboardFrame::OnAddSpendingClicked(wxCommandEvent& event) {
+    (void)event;
     wxDialog dialog(this, wxID_ANY, "Add Spending", wxDefaultPosition, wxSize(420, 340));
     wxBoxSizer* root = new wxBoxSizer(wxVERTICAL);
 
@@ -177,6 +180,7 @@ void DashboardFrame::OnAddSpendingClicked(wxCommandEvent& event) {
 }
 
 void DashboardFrame::OnHistoryClicked(wxCommandEvent& event) {
+    (void)event;
     wxBoxSizer* sizer = static_cast<wxBoxSizer*>(contentPanel->GetSizer());
     sizer->Clear(true);
 
@@ -218,6 +222,7 @@ void DashboardFrame::OnHistoryClicked(wxCommandEvent& event) {
 }
 
 void DashboardFrame::OnFriendsClicked(wxCommandEvent& event) {
+    (void)event;
     wxBoxSizer* sizer = static_cast<wxBoxSizer*>(contentPanel->GetSizer());
     sizer->Clear(true);
 
@@ -239,6 +244,7 @@ void DashboardFrame::OnFriendsClicked(wxCommandEvent& event) {
 }
 
 void DashboardFrame::OnLogoutClicked(wxCommandEvent& event) {
+    (void)event;
     if (db.logout()) {
         StartFrame* startFrame = new StartFrame("Start Finance App", db);
         startFrame->Show(true);

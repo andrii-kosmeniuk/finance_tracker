@@ -1,5 +1,5 @@
 CXX = clang++
-CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -g -O2
+CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -Wno-deprecated-copy -g -O2
 
 PKG_CONFIG := $(shell command -v pkg-config 2>/dev/null)
 MYSQL_CONFIG := $(shell command -v mysql_config 2>/dev/null || command -v mariadb_config 2>/dev/null)

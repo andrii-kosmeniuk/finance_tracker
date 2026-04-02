@@ -6,7 +6,7 @@
 
 using namespace std;
 
-void loadEnvFile(const string& filepath = ".env");
+bool loadEnvFile(const string& filepath = ".env");
 string hashPassword(const string& password);
 bool verifyPassword(const string& hash, const string& password);
 bool executeSQLFromFile(MySQLConnection& db, const string& filepath);

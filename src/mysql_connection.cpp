@@ -9,8 +9,11 @@
 #include <sstream>
 #include <cstdlib>
 #include <limits>
+#include <type_traits>
+#include <utility>
 
 using namespace std;
+using MySQLIsNullFlag = std::remove_pointer_t<decltype(std::declval<MYSQL_BIND>().is_null)>;
 
 MySQLConnection::MySQLConnection(): conn(NULL), connected(false){
     const char* host_env = getenv("DB_HOST");
@@ -19,23 +22,25 @@ MySQLConnection::MySQLConnection(): conn(NULL), connected(false){
     const char* database_env = getenv("DB_NAME");
     const char* port_env = getenv("DB_PORT");
 
-    host = host_env ? host_env : "localhost";
+    host = host_env ? host_env : "127.0.0.1";
     user = user_env ? user_env : "root";
-    password = password_env ? password_env : "your_password";
+    password = password_env ? password_env : "";
     database = database_env ? database_env : "manage_spendings";
-    port = 3360;
+    port = 3306;
 
     if (port_env != nullptr) {
         try {
             port = stoi(port_env);
         } catch (const exception&) {
-            cerr << "Invalid DB_PORT value, using default 3360." << endl;
+            cerr << "Invalid DB_PORT value, using default 3306." << endl;
         }
     }
 
     conn = mysql_init(NULL);
-    if(conn == NULL)
+    if(conn == NULL) {
+        lastError = "MySQL initialization failed";
         cerr<<"MySQL initialization failed"<<endl;
+    }
 }
 
 MySQLConnection::~MySQLConnection(){
@@ -44,23 +49,70 @@ MySQLConnection::~MySQLConnection(){
 
 bool MySQLConnection::connect()
 {
+    lastError.clear();
     if (connected) return true;
 
     if (conn == nullptr) {
         conn = mysql_init(nullptr);
         if (conn == nullptr) {
             cerr << "mysql_init failed!" << endl;
+            lastError = "mysql_init failed";
             return false;
         }
     }
 
     if (mysql_real_connect(conn, host, user, password, database, port, NULL, 0) == NULL) {
-        cerr << "Connection error: " << mysql_error(conn) << endl;
+        const unsigned int errorCode = mysql_errno(conn);
+        const string connectError = mysql_error(conn);
+
+        // 1049 = unknown database. First-run experience: connect without DB, create it, then select it.
+        if (errorCode == 1049) {
+            mysql_close(conn);
+            conn = mysql_init(nullptr);
+            if (conn == nullptr) {
+                cerr << "mysql_init failed while creating missing database." << endl;
+                lastError = "mysql_init failed while creating missing database";
+                return false;
+            }
+
+            if (mysql_real_connect(conn, host, user, password, nullptr, port, NULL, 0) == NULL) {
+                cerr << "Connection error (server only): " << mysql_error(conn) << endl;
+                lastError = string("Connection error (server only): ") + mysql_error(conn);
+                return false;
+            }
+
+            const string createDbQuery = "CREATE DATABASE IF NOT EXISTS `" + string(database) + "`";
+            if (mysql_query(conn, createDbQuery.c_str()) != 0) {
+                cerr << "Failed to create database '" << database << "': " << mysql_error(conn) << endl;
+                lastError = string("Failed to create database '") + database + "': " + mysql_error(conn);
+                return false;
+            }
+
+            if (mysql_select_db(conn, database) != 0) {
+                cerr << "Failed to select database '" << database << "': " << mysql_error(conn) << endl;
+                lastError = string("Failed to select database '") + database + "': " + mysql_error(conn);
+                return false;
+            }
+
+            connected = true;
+            cout << "Connected to MySQL server and created database: " << database << endl;
+            return true;
+        }
+
+        cerr << "Connection error: " << connectError << " (host=" << host << ", port=" << port
+             << ", user=" << user << ", db=" << database << ")" << endl;
+        lastError = "Connection error: " + connectError + " (host=" + host + ", port=" + to_string(port) +
+                    ", user=" + user + ", db=" + database + ")";
         return false;
     }
     connected = true;
     cout << "Connected to MySQL database: " << database << endl;
     return true;
+}
+
+const string& MySQLConnection::getLastError() const
+{
+    return lastError;
 }
 
 void MySQLConnection::disconnect()
@@ -208,7 +260,7 @@ bool MySQLConnection::login(const string& username, const string& password){
 
     char hash_buffer[crypto_pwhash_STRBYTES];
     unsigned long hash_length = 0;
-    bool is_null = false;
+    MySQLIsNullFlag is_null = 0;
 
     result[0].buffer_type = MYSQL_TYPE_STRING;
     result[0].buffer = hash_buffer;
@@ -279,7 +331,7 @@ bool MySQLConnection::getUserId(const string& nickname, int& userId) {
 
     MYSQL_BIND result[1] = {};
     int fetchedId = 0;
-    bool isNull = false;
+    MySQLIsNullFlag isNull = 0;
 
     result[0].buffer_type = MYSQL_TYPE_LONG;
     result[0].buffer = &fetchedId;
@@ -325,7 +377,7 @@ bool MySQLConnection::getCategoryIdOrCreate(const string& categoryName, int& cat
 
     MYSQL_BIND selectResult[1] = {};
     int fetchedId = 0;
-    bool isNull = false;
+    MySQLIsNullFlag isNull = 0;
     selectResult[0].buffer_type = MYSQL_TYPE_LONG;
     selectResult[0].buffer = &fetchedId;
     selectResult[0].is_null = &isNull;
@@ -467,18 +519,18 @@ vector<SpendingEntry> MySQLConnection::getSpendings(const string& nickname, int 
     MYSQL_BIND result[4] = {};
     char dateBuffer[32] = {};
     unsigned long dateLength = 0;
-    bool dateNull = false;
+    MySQLIsNullFlag dateNull = 0;
 
     char categoryBuffer[64] = {};
     unsigned long categoryLength = 0;
-    bool categoryNull = false;
+    MySQLIsNullFlag categoryNull = 0;
 
     double amount = 0.0;
-    bool amountNull = false;
+    MySQLIsNullFlag amountNull = 0;
 
     char descriptionBuffer[512] = {};
     unsigned long descriptionLength = 0;
-    bool descriptionNull = false;
+    MySQLIsNullFlag descriptionNull = 0;
 
     result[0].buffer_type = MYSQL_TYPE_STRING;
     result[0].buffer = dateBuffer;
@@ -557,7 +609,7 @@ string MySQLConnection::getUserName(const string& nickname) {
     MYSQL_BIND result[1] = {};
     char nameBuffer[256] = {};
     unsigned long nameLength = 0;
-    bool isNull = false;
+    MySQLIsNullFlag isNull = 0;
 
     result[0].buffer_type = MYSQL_TYPE_STRING;
     result[0].buffer = nameBuffer;

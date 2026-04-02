@@ -8,13 +8,14 @@
 
 using namespace std;
 
-void loadEnvFile(const string& filepath)
+bool loadEnvFile(const string& filepath)
 {
     ifstream file(filepath);
     if(!file.is_open())
     {
-        cerr << "Could not open the .env file: "<<filepath<<endl;
-        return;
+        cerr << "Warning: .env file not found at '" << filepath
+             << "'. Using built-in DB defaults (host=127.0.0.1, port=3306)." << endl;
+        return false;
     }
 
     string line;
@@ -36,6 +37,7 @@ void loadEnvFile(const string& filepath)
         setenv(key.c_str(),value.c_str(),1);
     }
     cout<<"Variables from .env file loaded successfully!"<<endl;
+    return true;
 }
 
 string hashPassword(const string& password)

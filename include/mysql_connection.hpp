@@ -31,6 +31,7 @@ class MySQLConnection{
         const char* database;
         int port;
         bool connected;
+        string lastError;
 
         bool getUserId(const string& nickname, int& userId);
         bool getCategoryIdOrCreate(const string& categoryName, int& categoryId);
@@ -40,6 +41,7 @@ class MySQLConnection{
 
         bool connect();
         void disconnect();
+        const string& getLastError() const;
         bool executeQuery(const string& query);
         bool registration(const string& nickname, const string& name,
                     const string& password, const string& email);

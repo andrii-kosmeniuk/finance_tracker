@@ -33,12 +33,14 @@ LoginFrame::LoginFrame(const wxString& title, MySQLConnection& dbConn): wxFrame(
 }
 
 void LoginFrame::OnClose(wxCloseEvent& evt) {
+    (void)evt;
     Destroy();
     wxTheApp->ExitMainLoop();
 }
 
 
 void LoginFrame::OnLoginClick(wxCommandEvent& evt){
+    (void)evt;
     HandleUserLogin();
 }
 

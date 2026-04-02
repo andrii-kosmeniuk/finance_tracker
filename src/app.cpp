@@ -7,11 +7,20 @@
 using namespace std;
 
 bool App::OnInit(){
-    loadEnvFile();
+    const bool envLoaded = loadEnvFile();
     db = std::make_unique<MySQLConnection>();
 
-    if(!db->connect())
+    if(!db->connect()) {
+        const wxString envHint = envLoaded
+            ? "Loaded .env but DB connection failed. Verify DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME."
+            : "No .env found. Create one in project root with DB credentials, then retry.";
+        const wxString details = db->getLastError().empty()
+            ? "No detailed DB error available."
+            : wxString::FromUTF8(db->getLastError());
+        wxMessageBox("Database connection failed.\n" + envHint + "\n\nDetails: " + details,
+                     "Startup Error", wxOK | wxICON_ERROR);
         return false;
+    }
     cout << "Program is running!"<<endl;
 
     const string create_db_query ="CREATE DATABASE IF NOT EXISTS manage_spendings";

@@ -1,99 +1,122 @@
 # Finance Tracker
 
-Desktop finance tracker written in **C++** with a **wxWidgets GUI** and **MySQL** persistence.
+Desktop finance tracker written in **C++** with a **wxWidgets GUI** and **MySQL/MariaDB** persistence.
 
 ## Tech stack
 
 - **Language:** C++17
 - **GUI framework:** wxWidgets
-- **Database:** MySQL / MariaDB (via `libmysqlclient`)
+- **Database:** MySQL/MariaDB (`libmysqlclient`/`libmariadb`)
 - **Password hashing:** libsodium (`crypto_pwhash`)
 - **Build tool:** Make + clang++
-- **Schema setup:** SQL scripts in `queries/`
 
 ## Project structure
 
-- `src/` – application source files
-- `include/` – headers
-- `queries/` – SQL scripts for creating database tables
-- `makefile` – build instructions
-- `bin/` – compiled binary output (`bin/comp` after build)
+- `src/` - application source files
+- `include/` - headers
+- `queries/` - SQL scripts for schema creation
+- `Makefile` - build instructions
+- `bin/` - compiled output (`bin/comp`)
 
-## Prerequisites
+## Quick start (Ubuntu)
 
-Install the following:
+From project root:
 
-1. **clang++** (with C++17 support)
-2. **make**
-3. **wxWidgets development package** (must provide `wx-config` *or* `wxwidgets` pkg-config metadata)
-4. **MySQL client development library** (`libmysqlclient`)
-5. **libsodium development library**
-6. A running **MySQL/MariaDB server**
+```bash
+sudo apt update
+sudo apt install -y clang make libwxgtk3.2-dev libmariadb-dev libsodium-dev mariadb-server mariadb-client
+sudo systemctl enable --now mariadb
+```
 
-> The build tries `wx-config`, `wx-config-gtk3`, and versioned `wx-config-*` binaries first, then falls back to `pkg-config` (`wxwidgets` / `wxgtk3.2`).
+Create database and an app user:
 
-## Configuration
+```bash
+sudo mariadb -e "CREATE DATABASE IF NOT EXISTS manage_spendings;"
+sudo mariadb -e "CREATE USER IF NOT EXISTS 'finance_user'@'127.0.0.1' IDENTIFIED BY 'finance_pass';"
+sudo mariadb -e "GRANT ALL PRIVILEGES ON manage_spendings.* TO 'finance_user'@'127.0.0.1'; FLUSH PRIVILEGES;"
+```
 
-The app reads database configuration from a `.env` file in the project root.
-
-Create `.env`:
+Create `.env` in project root:
 
 ```env
 DB_HOST=127.0.0.1
-DB_USER=root
-DB_PASSWORD=your_password
+DB_USER=finance_user
+DB_PASSWORD=finance_pass
 DB_NAME=manage_spendings
 DB_PORT=3306
 ```
 
-### Notes
+Build and run:
 
-- On startup, the app loads `.env` and tries to connect to MySQL.
-- It will create the database `manage_spendings` if it does not exist.
-- It then executes all SQL scripts from `queries/` to ensure required tables are created.
+```bash
+make
+./bin/comp
+```
 
-## Build and run
+## Configuration
 
-From the repository root:
+The app reads DB settings from `.env` in project root.
+
+If `.env` is missing, fallback defaults are:
+
+- `DB_HOST=127.0.0.1`
+- `DB_USER=root`
+- `DB_PASSWORD=` (empty)
+- `DB_NAME=manage_spendings`
+- `DB_PORT=3306`
+
+On startup, the app:
+
+1. Loads `.env` (if present)
+2. Connects to MySQL/MariaDB
+3. Creates database `manage_spendings` if it does not exist
+4. Executes SQL files in `queries/`
+
+## Build
 
 ```bash
 make
 ```
 
-This creates the executable at:
+Output binary:
 
 ```bash
 bin/comp
 ```
 
-Run it:
-
-```bash
-./bin/comp
-```
-
-Clean build artifacts:
+Clean artifacts:
 
 ```bash
 make clean
 ```
 
-## Typical first run
-
-1. Start your MySQL/MariaDB server.
-2. Create/update `.env` with valid DB credentials.
-3. Build with `make`.
-4. Launch `./bin/comp`.
-5. Register a new user in the GUI, then log in.
-
 ## Troubleshooting
 
-- **`wx-config: command not found`**
-  - Install wxWidgets development packages and ensure one of these is available:
-    - `wx-config`/`wx-config-gtk3`/`wx-config-3.2`
-    - `pkg-config` metadata for `wxwidgets` or `wxgtk3.2`
-- **MySQL connection error on startup**
-  - Verify host/user/password/port in `.env`.
-  - Confirm DB server is running and accessible.
-- **Linker errors for mysql/sodium**
-  - Install `libmysqlclient` and `libsodium` development libraries.
+- **`wx-config not found`**
+  - Install wxWidgets dev package:
+  - `sudo apt install -y libwxgtk3.2-dev`
+
+- **Startup error: `Can't connect to server on '127.0.0.1'`**
+  - Server is not running or not installed.
+  - Install/start MariaDB:
+    - `sudo apt install -y mariadb-server mariadb-client`
+    - `sudo systemctl enable --now mariadb`
+
+- **Startup error: `Access denied for user ...`**
+  - `.env` credentials are wrong or user lacks privileges.
+  - Recreate/grant user as shown in Quick start.
+
+- **Linker/headers errors for mysql/sodium**
+  - Install dev libs:
+  - `sudo apt install -y libmariadb-dev libsodium-dev`
+
+- **Verify DB credentials manually**
+
+```bash
+mariadb -h 127.0.0.1 -P 3306 -u finance_user -pfinance_pass -e "SELECT 1;"
+```
+
+## Notes
+
+- `.env` is ignored by git (`.gitignore`) so secrets are not committed.
+- If you prefer MySQL server instead of MariaDB, equivalent setup works as long as client/server are reachable from `.env`.

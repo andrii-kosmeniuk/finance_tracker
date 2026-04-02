@@ -27,6 +27,7 @@ StartFrame::StartFrame(const wxString& title, MySQLConnection& dbConn): wxFrame(
 StartFrame::~StartFrame() {}
 
 void StartFrame::OnRegisterClick(wxCommandEvent& evt) {
+    (void)evt;
     RegisterFrame* regFrame = new RegisterFrame("Register", db);
     regFrame->Show(true);
     regFrame->Center();
@@ -35,6 +36,7 @@ void StartFrame::OnRegisterClick(wxCommandEvent& evt) {
 }
 
 void StartFrame::OnLoginClick(wxCommandEvent& evt) {
+    (void)evt;
     LoginFrame* loginFrame = new LoginFrame("Login", db);
     loginFrame->Show(true);
     loginFrame->Center();

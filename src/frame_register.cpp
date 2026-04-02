@@ -45,11 +45,13 @@ RegisterFrame::RegisterFrame(const wxString& title, MySQLConnection& dbConn): wx
 }
 
 void RegisterFrame::OnClose(wxCloseEvent& evt) {
+    (void)evt;
     Destroy();
     wxTheApp->ExitMainLoop();
 }
 
 void RegisterFrame::OnRegisterClick(wxCommandEvent& evt){
+    (void)evt;
     HandleUserRegistration();
 }
 
