@@ -8,7 +8,7 @@ using namespace std;
 
 void loadEnvFile(const string& filepath = ".env");
 string hashPassword(const string& password);
-bool verifyPassword(const string& password, const string& hash);
+bool verifyPassword(const string& hash, const string& password);
 bool executeSQLFromFile(MySQLConnection& db, const string& filepath);
 
 #endif

@@ -70,10 +70,10 @@ void RegisterFrame::HandleUserRegistration() {
     }
     if (db.registration(username, name, password, email)) {
         wxMessageBox("User registered successfully!", "Success", wxOK | wxICON_INFORMATION);
-        DashboardFrame* dashboardFrame = new DashboardFrame("Dashboard Finance", wxString(name), db);
+        DashboardFrame* dashboardFrame = new DashboardFrame("Dashboard Finance", wxString(username), db);
         dashboardFrame->Show(true);
-        this->Hide();
         wxTheApp->SetTopWindow(dashboardFrame);
+        this->Destroy();
     } 
     else {
         wxMessageBox("Registration failed.", "Error", wxOK | wxICON_ERROR);
