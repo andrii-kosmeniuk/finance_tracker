@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <string.h>
+#include <cstdlib>
 #include <sodium.h>
 #include <sstream>
 
@@ -15,13 +16,21 @@ MySQLConnection::MySQLConnection(): conn(NULL), connected(false){
     const char* user_env = getenv("DB_USER");
     const char* password_env = getenv("DB_PASSWORD");
     const char* database_env = getenv("DB_NAME");
-    int port_env = stoi(getenv("DB_PORT"));
+    const char* port_env = getenv("DB_PORT");
 
     host = host_env ? host_env : "localhost";
     user = user_env ? user_env : "root";
     password = password_env ? password_env : "your_password";
     database = database_env ? database_env : "manage_spendings";
-    port = port_env ? port_env : 3360;
+
+    port = 3360;
+    if (port_env && port_env[0] != '\0') {
+        char* end_ptr = nullptr;
+        long parsed_port = strtol(port_env, &end_ptr, 10);
+        if (*end_ptr == '\0' && parsed_port > 0 && parsed_port <= 65535) {
+            port = static_cast<int>(parsed_port);
+        }
+    }
 
     conn = mysql_init(NULL);
     if(conn == NULL)
