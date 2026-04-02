@@ -7,7 +7,7 @@
 
 class DashboardFrame: public wxFrame {
     public:
-        DashboardFrame(const wxString& title, const wxString& name, MySQLConnection& db);
+        DashboardFrame(const wxString& title, const wxString& nickname, MySQLConnection& db);
         ~DashboardFrame();
     private:
         void OnClose(wxCloseEvent& evt);
@@ -15,17 +15,15 @@ class DashboardFrame: public wxFrame {
         void OnHistoryClicked(wxCommandEvent& event);
         void OnFriendsClicked(wxCommandEvent& event);
         void OnLogoutClicked(wxCommandEvent& event);
+        void OnAddSpendingClicked(wxCommandEvent& event);
+
+        void ShowWelcome();
 
         wxPanel* contentPanel;
         wxPanel* panel;
-        wxStaticText* welcomeText;
-        wxBoxSizer* navSizer;
-
-        wxButton* btnProfile;
-        wxButton* btnHistory;
-        wxButton* btnFriends;
 
         MySQLConnection& db;
+        wxString currentNickname;
 };
 
 #endif
