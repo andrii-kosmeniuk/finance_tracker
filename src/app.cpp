@@ -8,7 +8,7 @@ using namespace std;
 
 bool App::OnInit(){
     loadEnvFile();
-    db = new MySQLConnection();
+    db = std::make_unique<MySQLConnection>();
 
     if(!db->connect())
         return false;
@@ -44,8 +44,4 @@ bool App::OnInit(){
 
     cout<<"Gui created in the center"<<endl;
     return true;
-}
-
-App::~App(){
-    delete db;
 }
