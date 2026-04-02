@@ -12,7 +12,7 @@ bool App::OnInit(){
 
     if(!db->connect())
         return false;
-    cout << "Programm is running!"<<endl;
+    cout << "Program is running!"<<endl;
 
     const string create_db_query ="CREATE DATABASE IF NOT EXISTS manage_spendings";
     if(db->executeQuery(create_db_query))
