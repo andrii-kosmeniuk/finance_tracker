@@ -1,16 +1,34 @@
 CXX = clang++
 CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -g -O2
 
-WX_CONFIG := $(shell command -v wx-config 2>/dev/null)
-ifeq ($(strip $(WX_CONFIG)),)
-$(error wx-config not found. Install wxWidgets dev package (for Ubuntu: sudo apt install libwxgtk3.2-dev))
-endif
-
-MYSQL_CONFIG := $(shell command -v mysql_config 2>/dev/null || command -v mariadb_config 2>/dev/null)
 PKG_CONFIG := $(shell command -v pkg-config 2>/dev/null)
+MYSQL_CONFIG := $(shell command -v mysql_config 2>/dev/null || command -v mariadb_config 2>/dev/null)
+WX_CONFIG := $(shell command -v wx-config 2>/dev/null || command -v wx-config-gtk3 2>/dev/null || command -v wx-config-3.2 2>/dev/null || command -v wx-config-3.0 2>/dev/null)
 
+ifneq ($(strip $(WX_CONFIG)),)
 WX_CXXFLAGS := $(shell $(WX_CONFIG) --cxxflags)
 WX_LIBS := $(shell $(WX_CONFIG) --libs)
+else
+ifneq ($(strip $(PKG_CONFIG)),)
+ifneq ($(shell $(PKG_CONFIG) --exists wxwidgets && echo yes),)
+WX_CXXFLAGS := $(shell $(PKG_CONFIG) --cflags wxwidgets)
+WX_LIBS := $(shell $(PKG_CONFIG) --libs wxwidgets)
+else
+ifneq ($(shell $(PKG_CONFIG) --exists wxgtk3.2 && echo yes),)
+WX_CXXFLAGS := $(shell $(PKG_CONFIG) --cflags wxgtk3.2)
+WX_LIBS := $(shell $(PKG_CONFIG) --libs wxgtk3.2)
+endif
+endif
+endif
+endif
+
+ifeq ($(strip $(WX_CXXFLAGS)),)
+$(error wxWidgets dev files not found. Install libwxgtk3.2-dev (Ubuntu) or add wx-config/wxwidgets pkg-config metadata to PATH)
+endif
+
+ifeq ($(strip $(WX_LIBS)),)
+$(error wxWidgets linker flags not found. Install libwxgtk3.2-dev (Ubuntu) or add wx-config/wxwidgets pkg-config metadata to PATH)
+endif
 
 ifneq ($(strip $(MYSQL_CONFIG)),)
 MYSQL_CFLAGS := $(shell $(MYSQL_CONFIG) --cflags 2>/dev/null)
