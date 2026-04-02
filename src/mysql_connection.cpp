@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <string.h>
+#include <cstdlib>
 #include <sodium.h>
 #include <sstream>
 #include <cstdlib>
